@@ -13,40 +13,40 @@ class AbstractParser {
 
     constructor(inputBuf,trimReductions,debug){
         
-        this.BUFSIZ = 512; 
+        this.BUFFER_SIZE = 512; 
 
         /* Return values of the parse() function. */
-        this.PARSEACCEPT = 0; /* Input parsed, no errors. */
-        this.PARSELEXICALERROR = 1;   /* Input could not be tokenized. */
-        this.PARSETOKENERROR = 2; /* Input is an invalid token. */
-        this.PARSESYNTAXERROR = 3;  /* Input does not match any rule. */
-        this.PARSECOMMENTERROR = 4;   /* A comment was started but not finished. */
-        this.PARSEMEMORYERROR = 5;  /* Insufficient memory. */
+        this.PARSE_ACCEPT = 0; /* Input parsed, no errors. */
+        this.PARSE_LEXICAL_ERROR = 1;   /* Input could not be tokenized. */
+        this.PARSE_TOKEN_ERROR = 2; /* Input is an invalid token. */
+        this.PARSE_SYNTAX_ERROR = 3;  /* Input does not match any rule. */
+        this.PARSE_COMMENT_ERROR = 4;   /* A comment was started but not finished. */
+        this.PARSE_MEMORY_ERROR = 5;  /* Insufficient memory. */
 
         /* Symbolclass types (defined by GOLD). */
-        this.SYMBOLNONTERMINAL = 0;
-        this.SYMBOLTERMINAL = 1;
-        this.SYMBOLWHITESPACE = 2;
-        this.SYMBOLEOF = 3;
-        this.SYMBOLCOMMENTSTART = 4;
-        this.SYMBOLCOMMENTEND = 5;
-        this.SYMBOLCOMMENTLINE = 6;
-        this.SYMBOLERROR = 7;
+        this.SYMBOL_NON_TERMINAL = 0;
+        this.SYMBOL_TERMINAL = 1;
+        this.SYMBOL_WHITESPACE = 2;
+        this.SYMBOL_EOF = 3;
+        this.SYMBOL_COMMENT_START = 4;
+        this.SYMBOL_COMMENT_END = 5;
+        this.SYMBOL_COMMENT_LINE = 6;
+        this.SYMBOL_ERROR = 7;
 
         /* Actionclass types (defined by GOLD). */
-        this.ACTIONSHIFT = 1;
-        this.ACTIONREDUCE = 2;
-        this.ACTIONGOTO = 3;
-        this.ACTIONACCEPT = 4;
+        this.ACTION_SHIFT = 1;
+        this.ACTION_REDUCE = 2;
+        this.ACTION_GOTO = 3;
+        this.ACTION_ACCEPT = 4;
 
         /* LALR state machine. Depending on the token.symbol the machine will
           change it's state and perform actions, such as reduce the tokenStack and
           iteratively call itself. */
-        this.LALRMEMORYERROR = 0;
-        this.LALRSYNTAXERROR = 1;
-        this.LALRACCEPT = 2;
-        this.LALRSHIFT = 3;
-        this.LALRGOTO = 4;
+        this.LALR_MEMORY_ERROR = 0;
+        this.LALR_SYNTAX_ERROR = 1;
+        this.LALR_ACCEPT = 2;
+        this.LALR_SHIFT = 3;
+        this.LALR_GOTO = 4;
 
         this.inputHere = 0;
         this.line = 0;
@@ -219,7 +219,7 @@ class AbstractParser {
             return null;
         }
 
-        /* If there are no more characters in the input then return this.SYMBOLEOF
+        /* If there are no more characters in the input then return this.SYMBOL_EOF
           and null. */
         if (this.inputHere >= this.inputSize) {
             this.symbol = 0;
@@ -288,7 +288,7 @@ class AbstractParser {
             return(this.readString());
         }
 
-        /* Return this.SYMBOLERROR and a string with 1 character from the input. */
+        /* Return this.SYMBOL_ERROR and a string with 1 character from the input. */
         this.symbol = 1;
         this.length = 1;
         
@@ -322,42 +322,42 @@ class AbstractParser {
             if (this.debug > 0) {
                 console.log(`LALR Syntax error: symbol ${this.inputToken.token.symbol} not found in LALR table ${this.lalrState}.`);
             }
-            return(this.LALRSYNTAXERROR);
+            return(this.LALR_SYNTAX_ERROR);
         }
 
-        /* this.ACTIONACCEPT: exit. We're finished parsing the input. */
-        if (this.grammar.lalrArray[this.lalrState].actions[action].action == this.ACTIONACCEPT) {
+        /* this.ACTION_ACCEPT: exit. We're finished parsing the input. */
+        if (this.grammar.lalrArray[this.lalrState].actions[action].action == this.ACTION_ACCEPT) {
             if (this.debug > 0) {
                 console.log(`LALR Accept: Target=${this.grammar.lalrArray[this.lalrState].actions[action].target}`);
             }
-            return(this.LALRACCEPT);
+            return(this.LALR_ACCEPT);
         }
 
-        /* this.ACTIONSHIFT: switch the LALR state and return. We're ready to accept
+        /* this.ACTION_SHIFT: switch the LALR state and return. We're ready to accept
           the next token. */
-        if (this.grammar.lalrArray[this.lalrState].actions[action].action == this.ACTIONSHIFT) {
+        if (this.grammar.lalrArray[this.lalrState].actions[action].action == this.ACTION_SHIFT) {
             this.lalrState = this.grammar.lalrArray[this.lalrState].actions[action].target;
             if (this.debug > 0) {
                 console.log(`LALR Shift: Lalr=${this.lalrState}`);
             }
-            return(this.LALRSHIFT);
+            return(this.LALR_SHIFT);
         }
 
-        /* this.ACTIONGOTO: switch the LALR state and return. We're ready to accept
+        /* this.ACTION_GOTO: switch the LALR state and return. We're ready to accept
           the next token.
           Note: In my implementation SHIFT and GOTO do the exact same thing. As far
           as I can tell GOTO only happens just after a reduction. Perhaps GOLD makes
           the difference to allow the program to perform special actions, which my
           implementation does not need. */
-        if (this.grammar.lalrArray[this.lalrState].actions[action].action == this.ACTIONGOTO) {
+        if (this.grammar.lalrArray[this.lalrState].actions[action].action == this.ACTION_GOTO) {
             this.lalrState = this.grammar.lalrArray[this.lalrState].actions[action].target;
             if (this.debug > 0) {
                 console.log(`LALR Goto: Lalr=${this.lalrState}`);
             }
-            return(this.LALRGOTO);
+            return(this.LALR_GOTO);
         }
 
-        /* this.ACTIONREDUCE:
+        /* this.ACTION_REDUCE:
           Create a new reduction according to the rule that is specified by the action.
           - Create a new reduction in the ReductionArray.
           - Pop tokens from the tokenStack and add them to the reduction.
@@ -375,7 +375,7 @@ class AbstractParser {
          */
         if ((this.trimReductions != 0) &&
                 (this.grammar.ruleArray[rule].symbolsCount == 1) &&
-                (this.grammar.symbolArray[this.grammar.ruleArray[rule].symbols[0]].kind == this.SYMBOLNONTERMINAL)) {
+                (this.grammar.symbolArray[this.grammar.ruleArray[rule].symbols[0]].kind == this.SYMBOL_NON_TERMINAL)) {
 
             if (this.debug > 0) {
                 console.log("LALR TrimReduction.");
@@ -521,12 +521,12 @@ class AbstractParser {
     /* Parse the input data.
       Returns a pointer to a ParserData struct, null if insufficient memory.
       The Data.result value will be one of these values:
-      this.PARSEACCEPT            Input parsed, no errors.
-      this.PARSELEXICALERROR          Input could not be tokenized.
-      this.PARSETOKENERROR        Input is an invalid token.
-      this.PARSESYNTAXERROR       Input does not match any rule.
-      this.PARSECOMMENTERROR          A comment was started but not finished.
-      this.PARSEMEMORYERROR       Insufficient memory.
+      this.PARSE_ACCEPT            Input parsed, no errors.
+      this.PARSE_LEXICAL_ERROR          Input could not be tokenized.
+      this.PARSE_TOKEN_ERROR        Input is an invalid token.
+      this.PARSE_SYNTAX_ERROR       Input does not match any rule.
+      this.PARSE_COMMENT_ERROR          A comment was started but not finished.
+      this.PARSE_MEMORY_ERROR       Insufficient memory.
      */
 
     parse() {
@@ -553,7 +553,7 @@ class AbstractParser {
 
         /* Sanity check. */
         if ((this.inputBuf == null) || (this.inputSize == 0)) {
-            return(this.PARSEACCEPT);
+            return(this.PARSE_ACCEPT);
         }
 
         /* Accept tokens until finished. */
@@ -583,14 +583,14 @@ class AbstractParser {
             
             if ((work.token.data == null) && (work.token.symbol != 0)) {
                 this.parseCleanup(this.tokenStack, work);
-                return(this.PARSEMEMORYERROR);
+                return(this.PARSE_MEMORY_ERROR);
             }
 
             /* If we are inside a comment then ignore everything except the end
               of the comment, or the start of a nested comment. */
             if (commentLevel > 0) {
                 /* Begin of nested comment: */
-                if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOLCOMMENTSTART) {
+                if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOL_COMMENT_START) {
                     /* Push the token on the tokenStack to keep track of line+column. */
                     work.nextToken = this.tokenStack;
                     this.tokenStack = work;
@@ -600,7 +600,7 @@ class AbstractParser {
                 }
 
                 /* End of comment: */
-                if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOLCOMMENTEND) {
+                if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOL_COMMENT_END) {
                     /* Delete the token. */
                     /*if (work.token.data != null)
                         delete work.token.data;
@@ -624,7 +624,7 @@ class AbstractParser {
                 }
 
                 /* End of file: Error exit. A comment was started but not finished. */
-                if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOLEOF) {
+                if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOL_EOF) {
                     /*if (work.token.data != null)
                         delete work.token.data;
                     delete work.token;
@@ -632,7 +632,7 @@ class AbstractParser {
                     let temp = null;
                     this.parseCleanup(this.tokenStack, temp);
                     */
-                    return(this.PARSECOMMENTERROR);
+                    return(this.PARSE_COMMENT_ERROR);
                 }
 
                 /* Any other token: delete and loop. */
@@ -649,7 +649,7 @@ class AbstractParser {
             /* If the token is the start of a comment then increment the
               commentLevel and loop. The routine will keep reading tokens
               until the end of the comment. */
-            if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOLCOMMENTSTART) {
+            if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOL_COMMENT_START) {
                 if (this.debug > 0)
                     console.log("parse: skipping comment.");
 
@@ -663,7 +663,7 @@ class AbstractParser {
 
             /* If the token is the start of a linecomment then skip the rest
               of the line. */
-            if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOLCOMMENTLINE) {
+            if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOL_COMMENT_LINE) {
                 if (work.token.data != null)
                     delete work.token.data;
                 delete work.token;
@@ -688,14 +688,14 @@ class AbstractParser {
             }
 
             /* If parse error then exit. */
-            if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOLERROR) {
-                console.log('this.SYMBOLERROR');
+            if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOL_ERROR) {
+                console.log('this.SYMBOL_ERROR');
                 this.parseCleanup(this.tokenStack, work);
-                return(this.PARSELEXICALERROR);
+                return(this.PARSE_LEXICAL_ERROR);
             }
 
             /* Ignore whitespace. */
-            if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOLWHITESPACE) {
+            if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOL_WHITESPACE) {
                 if (work.token.data != null)
                     delete work.token.data;
                 delete work.token;
@@ -704,12 +704,12 @@ class AbstractParser {
             }
 
             /* The tokenizer should never return a non-terminal symbol. */
-            if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOLNONTERMINAL) {
+            if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOL_NON_TERMINAL) {
                 if (this.debug > 0) {
-                    console.log(`Error: tokenizer returned this.SYMBOLNONTERMINAL '${work.token.data}'.`);
+                    console.log(`Error: tokenizer returned this.SYMBOL_NON_TERMINAL '${work.token.data}'.`);
                 }
                 this.parseCleanup(this.tokenStack, work);
-                return(this.PARSETOKENERROR);
+                return(this.PARSE_TOKEN_ERROR);
             }
 
             if (this.debug > 0) {
@@ -722,22 +722,22 @@ class AbstractParser {
             result = this.parseToken();
 
             /* If out of memory then exit. */
-            if (result == this.LALRMEMORYERROR) {
+            if (result == this.LALR_MEMORY_ERROR) {
                 this.parseCleanup(this.tokenStack, work);
-                return(this.PARSEMEMORYERROR);
+                return(this.PARSE_MEMORY_ERROR);
             }
 
             /* If syntax error then exit. */
-            if (result == this.LALRSYNTAXERROR) {
+            if (result == this.LALR_SYNTAX_ERROR) {
                 /* Return LALR state in the token.symbol. */
                 work.token.symbol = this.lalrState;
                 this.parseCleanup(this.tokenStack, work);
-                return(this.PARSESYNTAXERROR);
+                return(this.PARSE_SYNTAX_ERROR);
             }
 
             /* Exit if the LALR state machine says it has reached it's exit. */
-            if (result == this.LALRACCEPT) {
-                if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOLEOF) {
+            if (result == this.LALR_ACCEPT) {
+                if (this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOL_EOF) {
                     if (work.token.data != null)
                         delete work.token.data;
                     delete work.token;
@@ -747,7 +747,7 @@ class AbstractParser {
                 let temp = null;
                 this.parseCleanup(this.tokenStack, temp);
                 
-                return(this.PARSEACCEPT);
+                return(this.PARSE_ACCEPT);
             }
 
             /* Push the token onto the tokenStack. */
@@ -766,7 +766,7 @@ class AbstractParser {
         let i1 = 0;
         let i2 = 0;
         
-        let width = this.BUFSIZ;
+        let width = this.BUFFER_SIZE;
         let output = [];
         
         /* Sanity check. */
@@ -809,19 +809,19 @@ class AbstractParser {
         let s1 = '';
 
         switch (result) {
-            case this.PARSELEXICALERROR:
+            case this.PARSE_LEXICAL_ERROR:
                 console.log("Lexical error");
                 break;
-            case this.PARSECOMMENTERROR:
+            case this.PARSE_COMMENT_ERROR:
                 console.log("Comment error");
                 break;
-            case this.PARSETOKENERROR:
+            case this.PARSE_TOKEN_ERROR:
                 console.log("Tokenizer error");
                 break;
-            case this.PARSESYNTAXERROR:
+            case this.PARSE_SYNTAX_ERROR:
                 console.log("Syntax error");
                 break;
-            case this.PARSEMEMORYERROR:
+            case this.PARSE_MEMORY_ERROR:
                 console.log("Out of memory");
                 break;
         }
@@ -829,7 +829,7 @@ class AbstractParser {
         if (token != null) console.log(` at line ${token.line} column ${token.column}`);
         console.log(".");
 
-        if (result == this.PARSELEXICALERROR) {
+        if (result == this.PARSE_LEXICAL_ERROR) {
             if (token.data != null) {
                 s1 = this.readableString(token.data);
                 console.log(`The grammar does not specify what to do with '${s1}'.`);
@@ -837,13 +837,13 @@ class AbstractParser {
                 console.log("The grammar does not specify what to do.");
             }
         }
-        if (result == this.PARSETOKENERROR) {
+        if (result == this.PARSE_TOKEN_ERROR) {
             console.log("The tokenizer returned a non-terminal.");
         }
-        if (result == this.PARSECOMMENTERROR) {
+        if (result == this.PARSE_COMMENT_ERROR) {
             console.log("The comment has no end, it was started but not finished.");
         }
-        if (result == this.PARSESYNTAXERROR) {
+        if (result == this.PARSE_SYNTAX_ERROR) {
             if (token.data != null) {
                 s1 = this.readableString(token.data);
                 console.log(`Encountered '${s1}', but expected `);
@@ -852,7 +852,7 @@ class AbstractParser {
             }
             for (let i = 0; i < this.grammar.lalrArray[token.symbol].actionCount; i++) {
                 symbol = this.grammar.lalrArray[token.symbol].actions[i].entry;
-                if (this.grammar.symbolArray[symbol].kind == this.SYMBOLTERMINAL) {
+                if (this.grammar.symbolArray[symbol].kind == this.SYMBOL_TERMINAL) {
                     if (i > 0) {
                         console.log(", ");
                         if (i >= this.grammar.lalrArray[token.symbol].actionCount - 2) console.log("or ");
