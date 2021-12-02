@@ -58,7 +58,7 @@ const TokenStack = require('./gold/engine/TokenStack');
 const TokenType = require('./gold/engine/TokenType');
 const AbstractParser = require('./gold/AbstractParser');
 
-class %OutputFileBase% extends AbstractParser {
+class Base%OutputFileBase% extends AbstractParser {
 
   run() {
 
