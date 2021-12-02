@@ -62,259 +62,259 @@ const AbstractParser = require('./gold/AbstractParser');
 class %OutputFileBase% extends AbstractParser {
 ##END-PARAMETERS 
 
-    run() {
+  run() {
 
-        let ctx = new Context();
-        let result = this.parse();
+    let ctx = new Context();
+    let result = this.parse();
 
-        /* Interpret the results. */
-        if (result != this.PARSE_ACCEPT) {
-          this.showErrorMessage(result);
-        } else {
+    /* Interpret the results. */
+    if (result != this.PARSE_ACCEPT) {
+      this.showErrorMessage(result);
+    } else {
 
-            /* Initialize the Context. */
-            ctx.debug = this.debug;
-            ctx.indent = 0;
-            ctx.returnValue = null;
+      /* Initialize the Context. */
+      ctx.debug = this.debug;
+      ctx.indent = 0;
+      ctx.returnValue = null;
 
-            /* Start execution by calling the subroutine of the first Token on
-             the TokenStack. It's the "Start Symbol" that is defined in the
-             grammar. 
-            */
-            let fn = this.ruleJumpTable[this.firstToken.reductionRule];
-            this[fn](this.firstToken,ctx);
-        }
-
+      /* Start execution by calling the subroutine of the first Token on
+       the TokenStack. It's the "Start Symbol" that is defined in the
+       grammar. 
+      */
+      let fn = this.ruleJumpTable[this.firstToken.reductionRule];
+      this[fn](this.firstToken,ctx);
     }
 
-    /**
-    * TokenType token
-    * Context ctx
-    */
-    ruleTemplate(token,ctx) {
+  }
+
+  /**
+  * TokenType token
+  * Context ctx
+  */
+  ruleTemplate(token,ctx) {
+    
+    /* Debugging: show the description of the rule. */
+    if (ctx.debug > 0) {
+      this.showIndent(ctx.indent);
+      printf("Executing rule: %%s\n",this.grammar.ruleArray[token.reductionRule].description);
+    }
+
+    /* For all the sub-Tokens. */
+    for (let i = 0; i < this.grammar.ruleArray[token.reductionRule].symbolsCount; i++) {
+      
+      /* See if the Token is a Symbol or a Rule. */
+      if (token.tokens[i].reductionRule < 0) {
+
+        /* It's a Symbol. Make a copy of the Data. Most symbols are grammar,
+           for example '+', 'function', 'while', and such, and you won't
+           need to look at the Data. Other symbols are literals from the input
+           script, for example numbers, strings, variable names, and such. */
+        if(ctx.returnValue != null){
+          delete ctx.returnValue;
+        }
         
-        /* Debugging: show the description of the rule. */
+        ctx.returnValue = token.tokens[i].data;
+        //echo ctx.returnValue."\n";
+        /* Debugging: show a description of the Symbol, and it's value. */
         if (ctx.debug > 0) {
-            this.showIndent(ctx.indent);
-            printf("Executing rule: %%s\n",this.grammar.ruleArray[token.reductionRule].description);
+          this.showIndent(ctx.indent + 1);
+          printf("Token[%%u] = Symbol('%%s') = '%%s'\n",i, this.grammar.symbolArray[token.tokens[i].symbol].name,ctx.returnValue);
         }
 
-        /* For all the sub-Tokens. */
-        for (let i = 0; i < this.grammar.ruleArray[token.reductionRule].symbolsCount; i++) {
-            
-            /* See if the Token is a Symbol or a Rule. */
-            if (token.tokens[i].reductionRule < 0) {
+      } else {
 
-                /* It's a Symbol. Make a copy of the Data. Most symbols are grammar,
-                     for example '+', 'function', 'while', and such, and you won't
-                     need to look at the Data. Other symbols are literals from the input
-                     script, for example numbers, strings, variable names, and such. */
-                if(ctx.returnValue != null){
-                    delete ctx.returnValue;
-                }
-                
-                ctx.returnValue = token.tokens[i].data;
-                //echo ctx.returnValue."\n";
-                /* Debugging: show a description of the Symbol, and it's value. */
-                if (ctx.debug > 0) {
-                    this.showIndent(ctx.indent + 1);
-                    printf("Token[%%u] = Symbol('%%s') = '%%s'\n",i, this.grammar.symbolArray[token.tokens[i].symbol].name,ctx.returnValue);
-                }
+        /* It's a rule. */
 
-            } else {
-
-                /* It's a rule. */
-
-                /* Debugging: show a description of the rule. */
-                if (ctx.debug > 0) {
-                    this.showIndent(ctx.indent + 1);
-                    printf("Token[%%u] = Rule = %%s\n",i,this.grammar.ruleArray[token.tokens[i].reductionRule].description);
-                }
-
-                /* Call the rule's subroutine via the ruleJumpTable. */
-                ctx.indent = ctx.indent + 1;
-                let fn = this.ruleJumpTable[token.tokens[i].reductionRule];
-                this[fn](token.tokens[i],ctx);
-                ctx.indent = ctx.indent - 1;
-
-                /* At this point you will probably want to save the Context.returnValue
-                     somewhere. */
-
-                /* Debugging: show the value that was returned by the rule's subroutine. */
-                if (ctx.debug > 0) {
-                    this.showIndent(ctx.indent + 2);
-                    printf("Result value = %%s\n",ctx.returnValue);
-                }
-            }
+        /* Debugging: show a description of the rule. */
+        if (ctx.debug > 0) {
+          this.showIndent(ctx.indent + 1);
+          printf("Token[%%u] = Rule = %%s\n",i,this.grammar.ruleArray[token.tokens[i].reductionRule].description);
         }
 
+        /* Call the rule's subroutine via the ruleJumpTable. */
+        ctx.indent = ctx.indent + 1;
+        let fn = this.ruleJumpTable[token.tokens[i].reductionRule];
+        this[fn](token.tokens[i],ctx);
+        ctx.indent = ctx.indent - 1;
+
+        /* At this point you will probably want to save the Context.returnValue
+           somewhere. */
+
+        /* Debugging: show the value that was returned by the rule's subroutine. */
+        if (ctx.debug > 0) {
+          this.showIndent(ctx.indent + 2);
+          printf("Result value = %%s\n",ctx.returnValue);
+        }
+      }
     }
 
-    /***** Rule subroutines *****************************************************/
+  }
+
+  /***** Rule subroutines *****************************************************/
 
 ##RULE-TABLE
 ##RULES
-    /* 
-        Symbol Count: %SymbolCount%
-        %Description% 
-        TokenType token
-        Context ctx
-    */
-    %ID%(token,ctx) {
-    
-        if (ctx.debug > 0) {   
-            console.log("Calling %ID%");
-        }
-        
-        /*
-        //^ %Description%
-        */
-        
-        this.ruleTemplate(token,ctx); //Replace with your code
+  /* 
+    Symbol Count: %SymbolCount%
+    %Description% 
+    TokenType token
+    Context ctx
+  */
+  %ID%(token,ctx) {
+  
+    if (ctx.debug > 0) {   
+      console.log("Calling %ID%");
     }
+    
+    /*
+    //^ %Description%
+    */
+    
+    this.ruleTemplate(token,ctx); //Replace with your code
+  }
 
 ##END-RULES
 ##END-RULE-TABLE
 
-    initGrammar(){
+  initGrammar(){
 
 ##CHAR-SET-TABLE
 ##CHAR-SETS
-        let grammarCharset%Index%CharCount = %CharCount%;
-        let grammarCharset%Index% = [
+    let grammarCharset%Index%CharCount = %CharCount%;
+    let grammarCharset%Index% = [
 ##CHARS
-            %UnicodeIndex%,
+      %UnicodeIndex%,
 ##END-CHARS
-            0
-        ];
+      0
+    ];
 
 ##END-CHAR-SETS
 ##END-CHAR-SET-TABLE
 
 ##DFA-TABLE
 ##DFA-STATES
-        let grammarDfaEdgeArray%Index% = [
+    let grammarDfaEdgeArray%Index% = [
 ##DFA-EDGES
-            new DfaEdge(%Target%,grammarCharset%CharSetIndex%CharCount,grammarCharset%CharSetIndex%),
+      new DfaEdge(%Target%,grammarCharset%CharSetIndex%CharCount,grammarCharset%CharSetIndex%),
 ##END-DFA-EDGES
-            new DfaEdge(-1,0,null)
-        ];
+      new DfaEdge(-1,0,null)
+    ];
 
 ##END-DFA-STATES
 ##END-DFA-TABLE
 
 ##RULE-TABLE
 ##RULES
-        let grammarRulesymbolArray%Index% = [
+    let grammarRulesymbolArray%Index% = [
 ##RULE-SYMBOLS
-            %SymbolIndex%,
+      %SymbolIndex%,
 ##END-RULE-SYMBOLS
-            -1
-        ];
+      -1
+    ];
 
 ##END-RULES
 ##END-RULE-TABLE
 
 ##LALR-TABLE
 ##LALR-STATES
-        let grammarLalrActionArray%Index% = [
+    let grammarLalrActionArray%Index% = [
 ##LALR-ACTIONS
-            new Action(%SymbolIndex%,%Action%,%Value%),
+      new Action(%SymbolIndex%,%Action%,%Value%),
 ##END-LALR-ACTIONS
-            new Action(-1,-1,-1)
-        ];
+      new Action(-1,-1,-1)
+    ];
 ##END-LALR-STATES
 ##END-LALR-TABLE
 
 ##SYMBOL-TABLE
-        let grammarSymbolArray = [
+    let grammarSymbolArray = [
 ##SYMBOLS
-            /* %Value.Padded% */   
-            new Symbol(%Kind%,"%Name%")%Delimiter%
+      /* %Value.Padded% */
+      new Symbol(%Kind%,"%Name%")%Delimiter%
 ##END-SYMBOLS
-        ];
+    ];
 ##END-SYMBOL-TABLE
 
 ##DFA-TABLE
-        let grammarDfaStateArray = [
+    let grammarDfaStateArray = [
 ##DFA-STATES
-            /* %Index% */    
-            new DfaState(%AcceptIndex%,%EdgeCount%,grammarDfaEdgeArray%Index%),
+      /* %Index% */
+      new DfaState(%AcceptIndex%,%EdgeCount%,grammarDfaEdgeArray%Index%),
 ##END-DFA-STATES
-            new DfaState(-1,-1,null)
-        ];
+      new DfaState(-1,-1,null)
+    ];
 ##END-DFA-TABLE
 
 ##RULE-TABLE
-        let grammarRuleArray = [
+    let grammarRuleArray = [
 ##RULES
-            /* %Value.Padded% */
-            new Rule(%NonterminalIndex%,%SymbolCount%,grammarRulesymbolArray%Index%,"%Description%")%Delimiter%
+      /* %Value.Padded% */
+      new Rule(%NonterminalIndex%,%SymbolCount%,grammarRulesymbolArray%Index%,"%Description%")%Delimiter%
 ##END-RULES
-        ];
+    ];
 ##END-RULE-TABLE
 
 ##LALR-TABLE
-        let grammarLalrStateArray = [
+    let grammarLalrStateArray = [
 ##LALR-STATES
-            /* %Index% */
-            new LalrState(%ActionCount%,grammarLalrActionArray%Index%),
+      /* %Index% */
+      new LalrState(%ActionCount%,grammarLalrActionArray%Index%),
 ##END-LALR-STATES
-            new LalrState(-1,null)
-        ];
+      new LalrState(-1,null)
+    ];
 ##END-LALR-TABLE
 
-        this.grammar = new Grammar();
+    this.grammar = new Grammar();
 
 ##PARAMETERS
-        /* CaseSensitive */      
-        //this.grammar.caseSensitive = %CaseSensitive%;
-        /* InitialSymbol */
-        //this.grammar.initialSymbol = %StartSymbol%;
+    /* CaseSensitive */
+    //this.grammar.caseSensitive = %CaseSensitive%;
+    /* InitialSymbol */
+    //this.grammar.initialSymbol = %StartSymbol%;
 ##END-PARAMETERS
 ##DFA-TABLE
-        /* InitialDfaState */
-        this.grammar.initialDfaState = %InitialState%;
+    /* InitialDfaState */
+    this.grammar.initialDfaState = %InitialState%;
 ##END-DFA-TABLE
 ##LALR-TABLE
-        /* InitialLalrState */
-        this.grammar.initialLalrState = %InitialState%;
+    /* InitialLalrState */
+    this.grammar.initialLalrState = %InitialState%;
 ##END-LALR-TABLE
 ##SYMBOL-TABLE
-        /* SymbolCount */        
-        this.grammar.symbolCount = %Count%;
-        /* symbolArray */        
-        this.grammar.symbolArray = grammarSymbolArray;
+    /* SymbolCount */
+    this.grammar.symbolCount = %Count%;
+    /* symbolArray */
+    this.grammar.symbolArray = grammarSymbolArray;
 ##END-SYMBOL-TABLE
 ##RULE-TABLE
-        /* RuleCount */          
-        this.grammar.ruleCount = %Count%;
-        /* ruleArray */          
-        this.grammar.ruleArray = grammarRuleArray;
+    /* RuleCount */
+    this.grammar.ruleCount = %Count%;
+    /* ruleArray */
+    this.grammar.ruleArray = grammarRuleArray;
 ##END-RULE-TABLE
 ##DFA-TABLE
-        /* DfaStateCount */      
-        this.grammar.dfaStateCount = %Count%;
-        /* DfaArray */           
-        this.grammar.dfaArray = grammarDfaStateArray;
+    /* DfaStateCount */
+    this.grammar.dfaStateCount = %Count%;
+    /* DfaArray */
+    this.grammar.dfaArray = grammarDfaStateArray;
 ##END-DFA-TABLE
 ##LALR-TABLE
-        /* LalrStateCount */     
-        this.grammar.lalrStateCount = %Count%;
-        /* LalrArray */          
-        this.grammar.lalrArray = grammarLalrStateArray;
+    /* LalrStateCount */
+    this.grammar.lalrStateCount = %Count%;
+    /* LalrArray */
+    this.grammar.lalrArray = grammarLalrStateArray;
 ##END-LALR-TABLE
 
 ##RULE-TABLE
-        this.ruleJumpTable = [
+    this.ruleJumpTable = [
 ##RULES
-            /* %Index%. %Description% */
-            '%ID%'%Delimiter%
+      /* %Index%. %Description% */
+      '%ID%'%Delimiter%
 ##END-RULES
-        ];
+    ];
 ##END-RULE-TABLE
 
-    }
+  }
 
 }
 
