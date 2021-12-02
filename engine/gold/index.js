@@ -1,3 +1,2 @@
-exports.engine = require('./engine/index');
-exports.AbstractParser = require('./AbstractParser');
-
+exports.engine = require("./engine/index");
+exports.AbstractParser = require("./AbstractParser");
