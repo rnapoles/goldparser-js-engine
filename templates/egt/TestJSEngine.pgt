@@ -21,7 +21,6 @@ interpreter as it executes an input script.
 ##ID-SYMBOL-PREFIX 'Symbol'
 ##ID-RULE-PREFIX 'rule'
 ##DELIMITER ','
-
 /*
 ##PARAMETERS
 Name             : %Name%
@@ -46,8 +45,14 @@ The template is Javascript OO Engine
 
 */
 
-const %OutputFileBase% = require('./%OutputFileBase%');
+
+##PARAMETERS
+const %Name% = require('./%Name%');
+##END-PARAMETERS
 const input = '';
-const parser = new %OutputFileBase%(input,0,0);
-p.debug = 0;
-p.parse();
+##PARAMETERS
+const parser = new %Name%(input,1,0);
+##END-PARAMETERS 
+
+parser.debug = 0;
+parser.parse();

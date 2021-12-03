@@ -45,9 +45,11 @@ The template is Javascript OO Engine
 
 */
 
-const Base%OutputFileBase% = require('./Base%OutputFileBase%');
+##PARAMETERS
+const Base%Name% = require('./Base%Name%');
 
-class %OutputFileBase% extends Base%OutputFileBase% {
+class %Name% extends Base%Name% {
+##END-PARAMETERS 
 
   /***** Rule subroutines *****************************************************/
 
@@ -75,6 +77,24 @@ class %OutputFileBase% extends Base%OutputFileBase% {
 ##END-RULES
 ##END-RULE-TABLE
 
+  callRule(index,token,ctx)
+  {
+    switch (index)
+    {
+##RULES
+      case %Index%:
+        //%Description%
+        this.%ID%(token,ctx);
+      break;
+##END-RULES
+      default:
+        throw new Error("Unknown rule");
+    }
+  }
+
 }
 
-module.exports = %OutputFileBase%;
+
+##PARAMETERS
+module.exports = %Name%;
+##END-PARAMETERS

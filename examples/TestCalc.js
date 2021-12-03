@@ -1,5 +1,4 @@
-﻿
-/*
+﻿/*
 Name             : Calc
 Version          : 0.01
 Author           : GOLD Parser Builder and Nick Sabalausky
@@ -24,7 +23,7 @@ The template is Javascript OO Engine
 //const printf = require('../lib/printf');
 const Calc = require('./Calc');
 const input = '1+2*-3';
-const parser = new Calc(input,0,0);
+const parser = new Calc(input,1,0);
 
 parser.debug = 2;
 parser.parse();

@@ -56,8 +56,8 @@ const Symbol = require('./gold/engine/Symbol');
 const AbstractParser = require('./gold/AbstractParser');
 
 ##PARAMETERS
-class Base%OutputFileBase% extends AbstractParser {
-##END-PARAMETERS 
+class Base%Name% extends AbstractParser {
+##END-PARAMETERS
 
   parse() {
 
@@ -251,4 +251,6 @@ class Base%OutputFileBase% extends AbstractParser {
 
 }
 
-module.exports = Base%OutputFileBase%;
+##PARAMETERS
+module.exports = Base%Name%;
+##END-PARAMETERS 
