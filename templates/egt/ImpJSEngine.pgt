@@ -62,8 +62,8 @@ class %OutputFileBase% extends Base%OutputFileBase% {
   */
   %ID%(token,ctx) {
   
-    if (ctx.debug > 0) {   
-      console.log("Calling %ID%");
+    if (ctx.debug > 1) {
+      this.log("Calling %ID%\n");
     }
     
     /*

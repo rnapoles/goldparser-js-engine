@@ -26,7 +26,7 @@ const Calc = require('./Calc');
 const input = '2+2*-2';
 const parser = new Calc(input,0,0);
 
-parser.debug = 1;
+parser.debug = 2;
 parser.run();
 
 console.log(parser.output.join(''));
