@@ -1,7 +1,7 @@
 ##TEMPLATE-NAME 'Javascript OO Engine'
 ##LANGUAGE 'Javascript'
 ##ENGINE-NAME 'Javascript OO Engine'
-##AUTHOR 'Reinier Nápoles Martínez'
+##AUTHOR 'Reinier NÃ¡poles MartÃ­nez'
 ##FILE-EXTENSION 'js'
 ##NOTES
 
@@ -21,7 +21,6 @@ interpreter as it executes an input script.
 ##ID-SYMBOL-PREFIX 'Symbol'
 ##ID-RULE-PREFIX 'rule'
 ##DELIMITER ','
-
 /*
 ##PARAMETERS
 Name             : %Name%
@@ -54,8 +53,6 @@ const Grammar = require('./gold/engine/Grammar');
 const LalrState = require('./gold/engine/LalrState');
 const Rule = require('./gold/engine/Rule');
 const Symbol = require('./gold/engine/Symbol');
-const TokenStack = require('./gold/engine/TokenStack');
-const TokenType = require('./gold/engine/TokenType');
 const AbstractParser = require('./gold/AbstractParser');
 
 class %OutputFileBase% extends AbstractParser {

@@ -24,18 +24,19 @@ module.exports = {
     //"react",
   ],
   settings: {
-    "import/resolver": {
+    /*"import/resolver": {
       node: {
-        paths: ["src"],
+        paths: ["lib"],
       },
-    },
+    },*/
   },
   rules: {
     "no-unused-vars": [1, {}],
 
     //'max-lines-per-function': ["error", {"max": 20, "IIFEs": true, "skipBlankLines": true, "skipComments": true}],
     "array-callback-return": "warn",
-    "default-case": ["warn", {commentPattern: "^no default$"}],
+    //"default-case": ["warn", {commentPattern: "^no default$"}],
+    "no-constant-condition": ["error", { "checkLoops": false }],
     "dot-location": ["warn", "property"],
     //'eqeqeq' : ['warn', 'allow-null'],
     "new-parens": "warn",
@@ -159,16 +160,16 @@ module.exports = {
     // because it doesn't depend on whether the file exists, so this issue
     // doesn't apply to it.)
 
-    "import/default": "warn",
-    "import/export": "warn",
-    "import/named": "warn",
-    "import/namespace": "warn",
-    "import/no-amd": "warn",
-    "import/no-duplicates": "warn",
-    "import/no-extraneous-dependencies": "warn",
-    "import/no-named-as-default": "warn",
-    "import/no-named-as-default-member": "warn",
-    "import/no-unresolved": ["warn", {commonjs: true}],
+    //"import/default": "warn",
+    //"import/export": "warn",
+    //"import/named": "warn",
+    //"import/namespace": "warn",
+    //"import/no-amd": "warn",
+    //"import/no-duplicates": "warn",
+    //"import/no-extraneous-dependencies": "warn",
+    //"import/no-named-as-default": "warn",
+    //"import/no-named-as-default-member": "warn",
+    //"import/no-unresolved": ["warn", {commonjs: true}],
     // We don't support configuring Webpack using import source strings, so this
     // is always an error.
 
