@@ -1,4 +1,6 @@
 /mv
+/node_modules
 *.cgt
 *.egt
 *.log
+*.lock

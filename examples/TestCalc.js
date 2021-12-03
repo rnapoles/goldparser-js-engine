@@ -21,9 +21,9 @@ The template is Javascript OO Engine
 
 */
 
-const printf = require('./gold/printf');
+const printf = require('../lib/printf');
 const Calc = require('./Calc');
-const input = '2+2*2;';
+const input = '2+2*2';
 const parser = new Calc(input,0,0);
 
 parser.debug = 1;

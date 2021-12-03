@@ -5,12 +5,11 @@ module.exports = {
     commonjs: true,
     browser: true,
   },
-  extends: ["eslint:recommended", "plugin:react/recommended"],
+  extends: ["eslint:recommended"],
   parser: "@babel/eslint-parser",
   parserOptions: {
     babelOptions: {
       configFile: "./.babelrc",
-      presets: ["@babel/preset-react"],
     },
     ecmaFeatures: {
       jsx: true,
@@ -19,15 +18,12 @@ module.exports = {
     sourceType: "module",
   },
   plugins: [
-    "import",
+    //"import",
     //'flowtype',
     //'jsx-a11y',
-    "react",
+    //"react",
   ],
   settings: {
-    react: {
-      version: "detect", // React version. "detect" automatically picks the version you have installed.
-    },
     "import/resolver": {
       node: {
         paths: ["src"],
@@ -35,8 +31,6 @@ module.exports = {
     },
   },
   rules: {
-    "react/prop-types": [0, {}], // this is dumb, why is this still recommended
-    "react/no-unescaped-entities": [0, {}],
     "no-unused-vars": [1, {}],
 
     //'max-lines-per-function': ["error", {"max": 20, "IIFEs": true, "skipBlankLines": true, "skipComments": true}],
@@ -177,27 +171,6 @@ module.exports = {
     "import/no-unresolved": ["warn", {commonjs: true}],
     // We don't support configuring Webpack using import source strings, so this
     // is always an error.
-
-    // https://github.com/yannickcr/eslint-plugin-react/tree/master/docs/rules
-    "react/jsx-equals-spacing": ["warn", "never"],
-    "react/jsx-no-duplicate-props": ["warn", {ignoreCase: true}],
-    "react/jsx-no-undef": "error",
-    "react/jsx-pascal-case": [
-      "warn",
-      {
-        allowAllCaps: true,
-        ignore: [],
-      },
-    ],
-    "react/jsx-uses-react": "warn",
-    "react/jsx-uses-vars": "warn",
-    "react/no-danger-with-children": "warn",
-    "react/no-deprecated": "warn",
-    "react/no-direct-mutation-state": "warn",
-    "react/no-is-mounted": "warn",
-    "react/react-in-jsx-scope": "error",
-    "react/require-render-return": "warn",
-    "react/style-prop-object": "warn",
 
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/tree/master/docs/rules
 

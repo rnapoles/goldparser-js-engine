@@ -1,0 +1,59 @@
+{
+  "name": "goldparser-js-engine",
+  "version": "1.0.0",
+  "description": "This templates cgt/*, egt/* creates a .js files from Gold Parser Grammars.\r The complete Compiled Grammar Table is hardcoded into the .js\r files, so initializing the engine is very fast (it does not have\r to load the Compiled Grammar file from disk).",
+  "main": "lib/AbstractParser.js",
+  "directories": {
+    "example": "examples",
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rnapoles/goldparser-js-engine.git"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/eslint-parser": "^7.16.3",
+    "@babel/node": "^7.16.0",
+    "@babel/preset-env": "^7.16.4",
+    "@babel/preset-typescript": "^7.16.0",
+    "@babel/register": "^7.16.0",
+    "@start/cli": "^2.0.1",
+    "@start/plugin-find": "^2.0.0",
+    "@start/plugin-find-git-staged": "^2.0.1",
+    "@start/plugin-lib-babel": "^3.0.0",
+    "@start/plugin-lib-codecov": "^2.0.0",
+    "@start/plugin-lib-eslint": "^3.0.0",
+    "@start/plugin-lib-istanbul": "^2.0.0",
+    "@start/plugin-lib-tape": "^3.0.0",
+    "@start/plugin-lib-typescript-generate": "^4.0.0",
+    "@start/plugin-parallel": "^2.0.0",
+    "@start/plugin-read": "^2.0.0",
+    "@start/plugin-remove": "^2.0.0",
+    "@start/plugin-rename": "^2.0.0",
+    "@start/plugin-sequence": "^2.0.0",
+    "@start/plugin-write": "^2.0.1",
+    "@start/plugin-xargs": "^2.0.1",
+    "@start/reporter-verbose": "^2.0.1",
+    "babel-plugin-module-resolver": "^4.1.0",
+    "eslint": "^8.3.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-watch": "^8.0.0",
+    "prettier": "^2.5.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rnapoles/goldparser-js-engine/issues"
+  },
+  "homepage": "https://github.com/rnapoles/goldparser-js-engine#readme",
+  "dependencies": {
+    "core-js": "3"
+  }
+}
