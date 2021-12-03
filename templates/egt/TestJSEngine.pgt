@@ -50,4 +50,4 @@ const %OutputFileBase% = require('./%OutputFileBase%');
 const input = '';
 const parser = new %OutputFileBase%(input,0,0);
 p.debug = 0;
-p.run();
+p.parse();

@@ -59,10 +59,10 @@ const AbstractParser = require('./gold/AbstractParser');
 class Base%OutputFileBase% extends AbstractParser {
 ##END-PARAMETERS 
 
-  run() {
+  parse() {
 
     let ctx = new Context();
-    let result = this.parse();
+    let result = this.parseInput();
 
     /* Interpret the results. */
     if (result != this.PARSE_ACCEPT) {
