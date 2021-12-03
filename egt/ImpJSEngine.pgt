@@ -70,8 +70,7 @@ class %OutputFileBase% extends Base%OutputFileBase% {
     /*
     //^ %Description%
     */
-    
-    this.ruleTemplate(token,ctx); //Replace with your code
+    this.debugRule(token,ctx); //Replace with your code
   }
 
 ##END-RULES

@@ -21,8 +21,12 @@ The template is Javascript OO Engine
 
 */
 
-const TestCalc = require('./TestCalc');
-const input = '';
-const parser = new TestCalc(input,0,0);
-p.debug = 0;
-p.run();
+const printf = require('./gold/printf');
+const Calc = require('./Calc');
+const input = '2+2*2;';
+const parser = new Calc(input,0,0);
+
+parser.debug = 1;
+parser.run();
+
+console.log(parser.output.join(''));

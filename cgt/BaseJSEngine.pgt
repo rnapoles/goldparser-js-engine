@@ -87,69 +87,6 @@ class Base%OutputFileBase% extends AbstractParser {
 
   }
 
-  /**
-  * TokenType token
-  * Context ctx
-  */
-  ruleTemplate(token,ctx) {
-    
-    /* Debugging: show the description of the rule. */
-    if (ctx.debug > 0) {
-      this.showIndent(ctx.indent);
-      printf("Executing rule: %%s\n",this.grammar.ruleArray[token.reductionRule].description);
-    }
-
-    /* For all the sub-Tokens. */
-    for (let i = 0; i < this.grammar.ruleArray[token.reductionRule].symbolsCount; i++) {
-      
-      /* See if the Token is a Symbol or a Rule. */
-      if (token.tokens[i].reductionRule < 0) {
-
-        /* It's a Symbol. Make a copy of the Data. Most symbols are grammar,
-           for example '+', 'function', 'while', and such, and you won't
-           need to look at the Data. Other symbols are literals from the input
-           script, for example numbers, strings, variable names, and such. */
-        if(ctx.returnValue != null){
-          delete ctx.returnValue;
-        }
-        
-        ctx.returnValue = token.tokens[i].data;
-        //echo ctx.returnValue."\n";
-        /* Debugging: show a description of the Symbol, and it's value. */
-        if (ctx.debug > 0) {
-          this.showIndent(ctx.indent + 1);
-          printf("Token[%%u] = Symbol('%%s') = '%%s'\n",i, this.grammar.symbolArray[token.tokens[i].symbol].name,ctx.returnValue);
-        }
-
-      } else {
-
-        /* It's a rule. */
-
-        /* Debugging: show a description of the rule. */
-        if (ctx.debug > 0) {
-          this.showIndent(ctx.indent + 1);
-          printf("Token[%%u] = Rule = %%s\n",i,this.grammar.ruleArray[token.tokens[i].reductionRule].description);
-        }
-
-        /* Call the rule's subroutine via the ruleJumpTable. */
-        ctx.indent = ctx.indent + 1;
-        let fn = this.ruleJumpTable[token.tokens[i].reductionRule];
-        this[fn](token.tokens[i],ctx);
-        ctx.indent = ctx.indent - 1;
-
-        /* At this point you will probably want to save the Context.returnValue
-           somewhere. */
-
-        /* Debugging: show the value that was returned by the rule's subroutine. */
-        if (ctx.debug > 0) {
-          this.showIndent(ctx.indent + 2);
-          printf("Result value = %%s\n",ctx.returnValue);
-        }
-      }
-    }
-
-  }
-
   /***** Rule subroutines *****************************************************/
 
 ##RULE-TABLE
@@ -169,8 +106,7 @@ class Base%OutputFileBase% extends AbstractParser {
     /*
     //^ %Description%
     */
-    
-    this.ruleTemplate(token,ctx); //Replace with your code
+    this.debugRule(token,ctx); //Replace with your code
   }
 
 ##END-RULES

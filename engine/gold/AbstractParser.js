@@ -1,3 +1,4 @@
+const sprintf = require('./printf').sprintf;
 const Action = require("./engine/Action");
 const Context = require("./engine/Context");
 const DfaEdge = require("./engine/DfaEdge");
@@ -64,6 +65,7 @@ class AbstractParser {
     this.trimReductions = trimReductions;
     this.debug = debug;
     this.firstToken = null;
+    this.output = [];
     this.initGrammar();
   }
 
@@ -73,14 +75,6 @@ class AbstractParser {
     let inputStr = "";
 
     let length = this.length;
-
-    /*
-        console.log('this.inputBuf:',this.inputBuf);
-        console.log('this.inputBuf[this.inputHere]:',this.inputBuf[this.inputHere]);
-        console.log('this.inputSize:',this.inputSize);
-        console.log('this.inputHere:',this.inputHere);
-        console.log('length:',length);
-        */
 
     for (let i = 0; i < length; i++) {
       if (this.inputHere < this.inputSize) {
@@ -107,30 +101,14 @@ class AbstractParser {
       }
     }
 
-    /*let str = '';
-        foreach(inputStr as c){
-            str += c;
-        }*/
-
-    //console.log('---> inputStr:',inputStr,inputStr.length);
-
     return inputStr;
   }
 
   /* Search for a character in a characterset. Return 1 if found,
       0 if not found. */
   findChar(thisChar, characterSet, count) {
-    //console.log(characterSet,count);
-    //console.log('thisChar:',thisChar);
-    thisChar = thisChar.charCodeAt(0);
 
-    /*
-        console.log('--------');
-        console.log(arguments);
-        console.log('--------');
-        
-        console.log('thisChar:',thisChar);
-        */
+    thisChar = thisChar.charCodeAt(0);
 
     let here = 0;
     let interval = 0;
@@ -139,16 +117,11 @@ class AbstractParser {
     characterSet.forEach((c) => {
       str += String.fromCharCode(c);
     });
-    //console.log('characterSet:',characterSet.join());
-    //console.log('characterSet:',str);
-    //console.log('str.indexOf(String.fromCharCode(thisChar)):',str.indexOf(String.fromCharCode(thisChar)));
 
     /* Use wcschr() for charactersets with a length of up to 11
           characters. */
     if (count < 11) {
-      //if (wcschr(characterSet,thisChar) != null) return(1);
       if (str.indexOf(String.fromCharCode(thisChar)) != -1) {
-        //console.log('found x1',thisChar);
         return 1;
       }
 
@@ -166,7 +139,6 @@ class AbstractParser {
     interval = interval >> 1;
     while (interval > 0) {
       if (characterSet[here] == thisChar) {
-        //console.log('found x2',thisChar);
         return 1;
       }
       if (characterSet[here] > thisChar) {
@@ -183,7 +155,6 @@ class AbstractParser {
     }
 
     if (characterSet[here] == thisChar) {
-      //console.log('found x3',characterSet[here] == thisChar);
       return 1;
     }
 
@@ -216,7 +187,6 @@ class AbstractParser {
     acceptLength = 0;
     acceptIndex = -1;
     while (this.inputHere + this.length < this.inputSize) {
-      //console.log('====>',this.length,dfaIndex,i);
 
       /* If this is a valid symbol-terminal then save it. We know the
               input matches the symbol, but there may be a longer symbol that
@@ -229,7 +199,7 @@ class AbstractParser {
       /* Walk through the edges and scan the characterset of each edge for
               the current character. */
       for (i = 0; i < this.grammar.dfaArray[dfaIndex].edgeCount; i++) {
-        //console.log('findChar:',this.inputBuf[this.inputHere + this.length],this.inputHere,this.length);
+
         if (
           this.findChar(
             this.inputBuf[this.inputHere + this.length],
@@ -237,7 +207,7 @@ class AbstractParser {
             this.grammar.dfaArray[dfaIndex].edges[i].charCount
           ) == 1
         ) {
-          //console.log('!!! found');
+
           this.characterSet =
             this.grammar.dfaArray[dfaIndex].edges[i].characterSet;
           break;
@@ -246,34 +216,28 @@ class AbstractParser {
 
       /* If not found then exit the loop. */
       if (i >= this.grammar.dfaArray[dfaIndex].edgeCount) {
-        //console.log('edgeCount:',this.grammar.dfaArray[dfaIndex].edgeCount)
         break;
       }
 
       /* Jump to the targetState, which points to another set of DFA edges
               describing the next character. */
       dfaIndex = this.grammar.dfaArray[dfaIndex].edges[i].targetState;
-      //console.log('targetState:',dfaIndex);
 
       /* Increment the length, we have handled the character. */
       this.length++;
-      //console.log('new length:',this.inputBuf.slice(0,this.length)+']',this.length);
     }
 
     /* If the DFA is a terminal then return the symbol, and length characters
           from the input. */
     if (this.grammar.dfaArray[dfaIndex].acceptSymbol >= 0) {
       this.symbol = this.grammar.dfaArray[dfaIndex].acceptSymbol;
-      //console.log('this.symbol',this.symbol);
       return this.readString();
     }
 
     /* If we found a shorter terminal before, then return that symbol, and
           it's characters. */
     if (acceptIndex >= 0) {
-      //console.log('2-');
       this.symbol = this.grammar.dfaArray[acceptIndex].acceptSymbol;
-      //console.log('this.symbol',this.symbol);
       this.length = acceptLength;
       return this.readString();
     }
@@ -281,8 +245,6 @@ class AbstractParser {
     /* Return this.SYMBOL_ERROR and a string with 1 character from the input. */
     this.symbol = 1;
     this.length = 1;
-
-    //console.log('3-');
 
     return this.readString();
   }
@@ -312,8 +274,8 @@ class AbstractParser {
           context. */
     if (action >= this.grammar.lalrArray[this.lalrState].actionCount) {
       if (this.debug > 0) {
-        console.log(
-          `LALR Syntax error: symbol ${this.inputToken.token.symbol} not found in LALR table ${this.lalrState}.`
+        this.log(
+          `LALR Syntax error: symbol ${this.inputToken.token.symbol} not found in LALR table ${this.lalrState}.\n`
         );
       }
       return this.LALR_SYNTAX_ERROR;
@@ -325,10 +287,10 @@ class AbstractParser {
       this.ACTION_ACCEPT
     ) {
       if (this.debug > 0) {
-        console.log(
+        this.log(
           `LALR Accept: Target=${
             this.grammar.lalrArray[this.lalrState].actions[action].target
-          }`
+          }\n`
         );
       }
       return this.LALR_ACCEPT;
@@ -343,7 +305,7 @@ class AbstractParser {
       this.lalrState =
         this.grammar.lalrArray[this.lalrState].actions[action].target;
       if (this.debug > 0) {
-        console.log(`LALR Shift: Lalr=${this.lalrState}`);
+        this.log(`LALR Shift: Lalr=${this.lalrState}\n`);
       }
       return this.LALR_SHIFT;
     }
@@ -361,7 +323,7 @@ class AbstractParser {
       this.lalrState =
         this.grammar.lalrArray[this.lalrState].actions[action].target;
       if (this.debug > 0) {
-        console.log(`LALR Goto: Lalr=${this.lalrState}`);
+        this.log(`LALR Goto: Lalr=${this.lalrState}\n`);
       }
       return this.LALR_GOTO;
     }
@@ -375,12 +337,12 @@ class AbstractParser {
          */
     rule = this.grammar.lalrArray[this.lalrState].actions[action].target;
     if (this.debug > 0) {
-      console.log(
+      this.log(
         `LALR Reduce: Lalr=${this.lalrState} TargetRule=${
           this.grammar.symbolArray[this.grammar.ruleArray[rule].head].name
         }[${this.grammar.ruleArray[rule].head}] ==> ${
           this.grammar.ruleArray[rule].description
-        }`
+        }\n`
       );
     }
 
@@ -395,7 +357,7 @@ class AbstractParser {
         this.SYMBOL_NON_TERMINAL
     ) {
       if (this.debug > 0) {
-        console.log("LALR TrimReduction.");
+        this.log("LALR TrimReduction.\n");
       }
 
       /* Pop the rule from the tokenStack. */
@@ -450,7 +412,7 @@ class AbstractParser {
       popToken.nextToken = null;
       if (this.debug > 0) {
         if (popToken.token.data != null) {
-          console.log(
+          this.log(
             `  + symbol=${
               this.grammar.symbolArray[popToken.token.symbol].name
             }[${popToken.token.symbol}] RuleSymbol=${
@@ -459,10 +421,10 @@ class AbstractParser {
               ].name
             }[${this.grammar.ruleArray[rule].symbols[i - 1]}] Value='${
               popToken.token.data
-            }' Lalr=${popToken.lalrState}`
+            }' Lalr=${popToken.lalrState}\n`
           );
         } else {
-          console.log(
+          this.log(
             `  + symbol=${
               this.grammar.symbolArray[popToken.token.symbol].name
             }[${popToken.token.symbol}] RuleSymbol=${
@@ -471,7 +433,7 @@ class AbstractParser {
               ].name
             }[${this.grammar.ruleArray[rule].symbols[i - 1]}] Lalr=${
               popToken.lalrState
-            }`
+            }\n`
           );
         }
       }
@@ -484,10 +446,10 @@ class AbstractParser {
 
     /* Call the LALR state machine with the symbol of the rule. */
     if (this.debug > 0) {
-      console.log(
+      this.log(
         `Calling Lalr 1: Lalr=${this.lalrState} symbol=${
           this.grammar.symbolArray[this.grammar.ruleArray[rule].head].name
-        }[${this.grammar.ruleArray[rule].head}]`
+        }[${this.grammar.ruleArray[rule].head}]\n`
       );
     }
 
@@ -508,10 +470,10 @@ class AbstractParser {
           changed because of the reduction, so we must accept the token
           again. */
     if (this.debug > 0) {
-      console.log(
+      this.log(
         `Calling Lalr 2: Lalr=${this.lalrState} symbol=${
           this.grammar.symbolArray[this.inputToken.token.symbol].name
-        }[${this.inputToken.token.symbol}]`
+        }[${this.inputToken.token.symbol}]\n`
       );
     }
     return this.parseToken();
@@ -620,11 +582,6 @@ class AbstractParser {
       work.token.symbol = this.symbol;
       work.token.characterSet = this.characterSet;
 
-      //console.log('token.data:',`[${work.token.data}]`,work.token.data ? work.token.data.length : 0);
-      //console.log('token.symbol:',work.token.symbol);
-      //console.log('token.characterSet:',this.characterSet);
-      //console.log('rule:',this.grammar.ruleArray[work.token.symbol].description);
-
       if (work.token.data == null && work.token.symbol != 0) {
         this.parseCleanup(this.tokenStack, work);
         return this.PARSE_MEMORY_ERROR;
@@ -705,7 +662,9 @@ class AbstractParser {
         this.grammar.symbolArray[work.token.symbol].kind ==
         this.SYMBOL_COMMENT_START
       ) {
-        if (this.debug > 0) console.log("parse: skipping comment.");
+        if (this.debug > 0) {
+          this.log("parse: skipping comment.\n");
+        }
 
         /* Push the token on the tokenStack to keep track of line+column. */
         work.nextToken = this.tokenStack;
@@ -753,7 +712,7 @@ class AbstractParser {
       if (
         this.grammar.symbolArray[work.token.symbol].kind == this.SYMBOL_ERROR
       ) {
-        console.log("this.SYMBOL_ERROR");
+        this.log("SYMBOL_ERROR\n");
         this.parseCleanup(this.tokenStack, work);
         return this.PARSE_LEXICAL_ERROR;
       }
@@ -775,8 +734,8 @@ class AbstractParser {
         this.SYMBOL_NON_TERMINAL
       ) {
         if (this.debug > 0) {
-          console.log(
-            `Error: tokenizer returned this.SYMBOL_NON_TERMINAL '${work.token.data}'.`
+          this.log(
+            `Error: tokenizer returned this.SYMBOL_NON_TERMINAL '${work.token.data}'.\n`
           );
         }
         this.parseCleanup(this.tokenStack, work);
@@ -784,10 +743,10 @@ class AbstractParser {
       }
 
       if (this.debug > 0) {
-        console.log(
+        this.log(
           `token Read: Lalr=${this.lalrState} symbol=${
             this.grammar.symbolArray[work.token.symbol].name
-          }[${work.token.symbol}] Value='${work.token.data}'`
+          }[${work.token.symbol}] Value='${work.token.data}'\n`
         );
       }
 
@@ -856,7 +815,7 @@ class AbstractParser {
         output[i2++] = input[i1];
       } else {
         if (width - i2 > 4) {
-          //sprintf(s1,"%02X",input[i1]);
+          //ssprintf(s1,"%02X",input[i1]);
           output[i2++] = "[";
           output[i2++] = "0x0";
           output[i2++] = cp.toString(16);
@@ -869,12 +828,14 @@ class AbstractParser {
     return output.join("");
   }
 
-  showIndent(indent) {
-    let str = " ".repeat(indent);
-    /*for(let i = 0; i < indent; i++) {
-            
-        }*/
-    console.log(str);
+  showIndent() {
+    const args = Array.from(arguments);
+    const indent = args.shift();
+    const params = args.slice();
+
+    let output = " ".repeat(indent);
+    params[0] = output + params[0];
+    this.log(ssprintf.apply(null,params));
   }
 
   showErrorMessage(result) {
@@ -884,46 +845,47 @@ class AbstractParser {
 
     switch (result) {
       case this.PARSE_LEXICAL_ERROR:
-        console.log("Lexical error");
+        this.log("Lexical error");
         break;
       case this.PARSE_COMMENT_ERROR:
-        console.log("Comment error");
+        this.log("Comment error");
         break;
       case this.PARSE_TOKEN_ERROR:
-        console.log("Tokenizer error");
+        this.log("Tokenizer error");
         break;
       case this.PARSE_SYNTAX_ERROR:
-        console.log("Syntax error");
+        this.log("Syntax error");
         break;
       case this.PARSE_MEMORY_ERROR:
-        console.log("Out of memory");
+        this.log("Out of memory");
         break;
     }
 
-    if (token != null)
-      console.log(` at line ${token.line} column ${token.column}`);
-    console.log(".");
+    if (token != null){
+      this.log(` at line ${token.line} column ${token.column}`);
+    }
+    this.log(".\n");
 
     if (result == this.PARSE_LEXICAL_ERROR) {
       if (token.data != null) {
         s1 = this.readableString(token.data);
-        console.log(`The grammar does not specify what to do with '${s1}'.`);
+        this.log(`The grammar does not specify what to do with '${s1}'.`);
       } else {
-        console.log("The grammar does not specify what to do.");
+        this.log("The grammar does not specify what to do.");
       }
     }
     if (result == this.PARSE_TOKEN_ERROR) {
-      console.log("The tokenizer returned a non-terminal.");
+      this.log("The tokenizer returned a non-terminal.");
     }
     if (result == this.PARSE_COMMENT_ERROR) {
-      console.log("The comment has no end, it was started but not finished.");
+      this.log("The comment has no end, it was started but not finished.");
     }
     if (result == this.PARSE_SYNTAX_ERROR) {
       if (token.data != null) {
         s1 = this.readableString(token.data);
-        console.log(`Encountered '${s1}', but expected `);
+        this.log(`Encountered '${s1}', but expected `);
       } else {
-        console.log("Expected ");
+        this.log("Expected ");
       }
       for (
         let i = 0;
@@ -933,15 +895,79 @@ class AbstractParser {
         symbol = this.grammar.lalrArray[token.symbol].actions[i].entry;
         if (this.grammar.symbolArray[symbol].kind == this.SYMBOL_TERMINAL) {
           if (i > 0) {
-            console.log(", ");
-            if (i >= this.grammar.lalrArray[token.symbol].actionCount - 2)
-              console.log("or ");
+            this.log(", ");
+            if (i >= this.grammar.lalrArray[token.symbol].actionCount - 2){
+              this.log("or ");
+            }
           }
-          console.log(`'${this.grammar.symbolArray[symbol].name}'`);
+          this.log(`'${this.grammar.symbolArray[symbol].name}'`);
         }
       }
-      console.log(".");
+      this.log(".\n");
     }
+  }
+
+  log(data){
+    this.output.push(data);
+  }
+
+  /**
+  * TokenType token
+  * Context ctx
+  */
+  debugRule(token,ctx) {
+    
+    /* Debugging: show the description of the rule. */
+    if (ctx.debug > 0) {
+      this.showIndent(ctx.indent,"Executing rule: %s",this.grammar.ruleArray[token.reductionRule].description);
+    }
+
+    /* For all the sub-Tokens. */
+    for (let i = 0; i < this.grammar.ruleArray[token.reductionRule].symbolsCount; i++) {
+      
+      /* See if the Token is a Symbol or a Rule. */
+      if (token.tokens[i].reductionRule < 0) {
+
+        /* It's a Symbol. Make a copy of the Data. Most symbols are grammar,
+           for example '+', 'function', 'while', and such, and you won't
+           need to look at the Data. Other symbols are literals from the input
+           script, for example numbers, strings, variable names, and such. */
+        if(ctx.returnValue != null){
+          delete ctx.returnValue;
+        }
+        
+        ctx.returnValue = token.tokens[i].data;
+        //echo ctx.returnValue."\n";
+        /* Debugging: show a description of the Symbol, and it's value. */
+        if (ctx.debug > 0) {
+          this.showIndent(ctx.indent + 1,"Token[%u] = Symbol('%s') = '%s'",i, this.grammar.symbolArray[token.tokens[i].symbol].name,ctx.returnValue);
+        }
+
+      } else {
+
+        /* It's a rule. */
+
+        /* Debugging: show a description of the rule. */
+        if (ctx.debug > 0) {
+          this.showIndent(ctx.indent + 1, "Token[%u] = Rule = %s",i,this.grammar.ruleArray[token.tokens[i].reductionRule].description);
+        }
+
+        /* Call the rule's subroutine via the ruleJumpTable. */
+        ctx.indent = ctx.indent + 1;
+        let fn = this.ruleJumpTable[token.tokens[i].reductionRule];
+        this[fn](token.tokens[i],ctx);
+        ctx.indent = ctx.indent - 1;
+
+        /* At this point you will probably want to save the Context.returnValue
+           somewhere. */
+
+        /* Debugging: show the value that was returned by the rule's subroutine. */
+        if (ctx.debug > 0) {
+          this.showIndent(ctx.indent + 2,"Result value = %s",ctx.returnValue);
+        }
+      }
+    }
+
   }
 }
 
