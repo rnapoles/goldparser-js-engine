@@ -20,25 +20,25 @@ The template is Javascript OO Engine
 
 */
 
-const Action = require("./gold/engine/Action");
-const Context = require("./gold/engine/Context");
-const DfaEdge = require("./gold/engine/DfaEdge");
-const DfaState = require("./gold/engine/DfaState");
-const Grammar = require("./gold/engine/Grammar");
-const LalrState = require("./gold/engine/LalrState");
-const Rule = require("./gold/engine/Rule");
-const Symbol = require("./gold/engine/Symbol");
-const TokenStack = require("./gold/engine/TokenStack");
-const TokenType = require("./gold/engine/TokenType");
-const AbstractParser = require("./gold/AbstractParser");
+const Action = require("../lib/engine/Action");
+const Context = require("../lib/engine/Context");
+const DfaEdge = require("../lib/engine/DfaEdge");
+const DfaState = require("../lib/engine/DfaState");
+const Grammar = require("../lib/engine/Grammar");
+const LalrState = require("../lib/engine/LalrState");
+const Rule = require("../lib/engine/Rule");
+const Symbol = require("../lib/engine/Symbol");
+const TokenStack = require("../lib/engine/TokenStack");
+const TokenType = require("../lib/engine/TokenType");
+const AbstractParser = require("../lib/AbstractParser");
 
 class Calc extends AbstractParser {
   run() {
     let ctx = new Context();
-    let result = this.parse();
+    let result = this.parseInput();
 
     /* Interpret the results. */
-    if (result != this.PARSEACCEPT) {
+    if (result != this.PARSE_ACCEPT) {
       this.showErrorMessage(result);
     } else {
       /* Initialize the Context. */
@@ -51,7 +51,7 @@ class Calc extends AbstractParser {
              grammar. 
             */
       let fn = this.ruleJumpTable[this.firstToken.reductionRule];
-      console.log("-->", this.firstToken.reductionRule);
+      console.log("FirstRule:", this.firstToken.reductionRule);
       console.log(fn);
       this[fn](this.firstToken, ctx);
       console.log(ctx);
@@ -1087,10 +1087,11 @@ function printf() {
   return ret.length;
 }
 
-let inputBuf = "(1+2)*3";
-
+const inputBuf = "2+2*2";
 console.log(inputBuf);
 
-p = new Calc(inputBuf, 0, 0);
-p.debug = 0;
+const p = new Calc(inputBuf, 1, 2);
+p.debug = 2;
 p.run();
+//console.log(p.firstToken);
+//console.log(p.output.join(''));

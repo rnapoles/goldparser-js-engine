@@ -68,18 +68,19 @@ class Base%Name% extends AbstractParser {
     if (result != this.PARSE_ACCEPT) {
       this.showErrorMessage(result);
     } else {
+      if(this.firstToken){
+        /* Initialize the Context. */
+        ctx.debug = this.debug;
+        ctx.indent = 0;
+        ctx.returnValue = null;
 
-      /* Initialize the Context. */
-      ctx.debug = this.debug;
-      ctx.indent = 0;
-      ctx.returnValue = null;
-
-      /* Start execution by calling the subroutine of the first Token on
-       the TokenStack. It's the "Start Symbol" that is defined in the
-       grammar. 
-      */
-      let fn = this.ruleJumpTable[this.firstToken.reductionRule];
-      this[fn](this.firstToken,ctx);
+        /* Start execution by calling the subroutine of the first Token on
+         the TokenStack. It's the "Start Symbol" that is defined in the
+         grammar. 
+        */
+        let fn = this.ruleJumpTable[this.firstToken.reductionRule];
+        this[fn](this.firstToken,ctx);
+      }
     }
 
   }
@@ -96,7 +97,7 @@ class Base%Name% extends AbstractParser {
   */
   %ID%(token,ctx) {
   
-    if (ctx.debug > 1) {
+    if (ctx.debug >= 2) {
       this.log("Calling %ID%\n");
     }
     

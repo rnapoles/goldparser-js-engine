@@ -45,14 +45,15 @@ The template is Javascript OO Engine
 
 */
 
-
 ##PARAMETERS
 const %Name% = require('./%Name%');
 ##END-PARAMETERS
 const input = '';
+const DEBUG_LEVEL = 2;
+const TRIM_REDUCTIONS = 1;
 ##PARAMETERS
-const parser = new %Name%(input,1,0);
+const parser = new %Name%(input,TRIM_REDUCTIONS,DEBUG_LEVEL);
 ##END-PARAMETERS 
 
-parser.debug = 0;
 parser.parse();
+console.log(parser.output.join(''));

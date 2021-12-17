@@ -51,31 +51,44 @@ const Base%Name% = require('./Base%Name%');
 class %Name% extends Base%Name% {
 ##END-PARAMETERS 
 
-  /***** Rule subroutines *****************************************************/
+  parse() {
 
-##RULE-TABLE
-##RULES
-  /* 
-    
-    Symbol Count: %SymbolCount%
-    %Index% %Description% 
-    TokenType token
-    Context ctx
-  */
-  %ID%(token,ctx) {
-  
-    if (ctx.debug >= 2) {
-      this.log("Calling %ID%\n");
+    let result = this.parseInput();
+
+    /* Interpret the results. */
+    if (result != this.PARSE_ACCEPT) {
+      this.showErrorMessage(result);
+    } else {
+      if(this.firstToken){
+        /* Start execution by calling the subroutine of the first Token on
+         the TokenStack. It's the "Start Symbol" that is defined in the
+         grammar. 
+        */
+        this.result = this.callRule(this.firstToken);
+      }
     }
-    
-    /*
-    //^ %Description%
-    */
-    this.debugRule(token,ctx); //Replace with your code
+
   }
 
+  callRule(token)
+  {
+  
+    const index = token.reductionRule;
+    const tokens = token.tokens;
+
+    switch (index)
+    {
+##RULES
+      case %Index%:
+        //%Description%
+        return this.callRule(tokens[0]);
+      break;
 ##END-RULES
-##END-RULE-TABLE
+      default:
+        throw new Error("Unknown rule");
+    }
+
+  }
 
 }
 
